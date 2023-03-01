@@ -24,28 +24,47 @@ const connection = mysql.createConnection({
     database: 'recipedb'
   });
 
-  app.get('/recipes/all', function (req, res) {
-    connection.query('select tr.recipe_id, tr.recipe_name, tr.recipe_image from t_recipes tr;', (err, results) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      res.json(results);
-    });
-  })
+app.get('/recipes/all', function (req, res) {
+  connection.query('select tr.recipe_id, tr.recipe_name, tr.recipe_image from t_recipes tr;', (err, results) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    res.json(results);
+  });
+})
 
-  app.post('/recipes/ingredients/:recipe_id', function (req, res) {
-    const recipe_id = req.params.recipe_id;
+app.get('/recipes/ingredients/:recipe_id', function (req, res) {
+  const recipe_id = req.params.recipe_id;
+  connection.query(`select ti.ingredient_id, ti.ingredient_name, ti.ingredient_category, ` +
+                        `tm.measurement_desc, tmq.measurement_qty_desc from t_ingredients tis ` +
+                        'left join t_ingredient ti on tis.ingredient_id = ti.ingredient_id ' +
+                        'left join t_measurement tm on tis.measurement_id = tm.measurement_id ' +
+                        `left join t_measurement_qty tmq on tis.measurement_qty_id = tmq.measurement_qty_id where recipe_id = "${recipe_id}";`, (err, results) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        res.json(results);
+      })
+})
 
-    connection.query(`insert into t_list values (${recipe_id});`, (err, results) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      res.json(results);
-    });
-  })
-  
+app.get('/list', function (req, res) {
+      connection.query(`select tr.recipe_id, tr.recipe_name, ti.ingredient_id, ti.ingredient_name, ti.ingredient_category, ` +
+                        `tm.measurement_desc, tmq.measurement_qty_desc from t_ingredients tis ` +
+                        `inner join t_list tl on tl.recipe_id = tis.recipe_id ` +
+                        'left join t_recipes tr on tis.recipe_id = tr.recipe_id '+
+                        'left join t_ingredient ti on tis.ingredient_id = ti.ingredient_id ' +
+                        'left join t_measurement tm on tis.measurement_id = tm.measurement_id ' +
+                        'left join t_measurement_qty tmq on tis.measurement_qty_id = tmq.measurement_qty_id ' +
+                        'order by tr.recipe_name;', (err, results) => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        res.json(results);
+      })
+})
 
 app.get('/recipes/ingredients/all', function (req, res) {
     connection.query('select tr.recipe_id, tr.recipe_name, ti.ingredient_name, tm.measurement_desc, ' +
@@ -63,5 +82,18 @@ app.get('/recipes/ingredients/all', function (req, res) {
     });
   
 });
+
+
+app.post('/recipes/ingredients/:recipe_id', function (req, res) {
+  const recipe_id = req.params.recipe_id;
+
+  connection.query(`insert into t_list values (${recipe_id});`, (err, results) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    res.json(results);
+  });     
+})
 
 app.listen(process.env.PORT || 8080);
