@@ -18,10 +18,10 @@ app.use(function(req, res, next) {
 });
 
 const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'Quincy37%',
-    database: 'recipedb'
+    host: 'mealist-db.cjdba61klr0q.us-east-1.rds.amazonaws.com',
+    user: 'admin',
+    password: 'password23!',
+    database: 'recipeddb'
   });
 
 app.get('/recipes/all', function (req, res) {
