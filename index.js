@@ -95,6 +95,41 @@ app.post('/add/recipe/:recipe_id', function (req, res) {
   });     
 })
 
+app.get('/get/favorites', function (req, res) {
+    connection.query(`select tr.recipe_id, tr.recipe_name, tr.recipe_image from t_recipes tr ` +
+                      `where tr.recipe_id in (select recipe_id from t_favorites);`, (err, results) => {
+      if (err) {
+        console.error(err);
+        return;
+      }
+      res.json(results);
+    });    
+})
+
+app.delete('/remove/favorites/:recipe_id', function (req, res) {
+  const recipeId = req.params.recipe_id;
+
+  connection.query(`delete from t_favorites where recipe_id = ${recipeId};`, (err, results) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    res.json(results);
+  });    
+})
+
+app.post('/add/favorites/:recipe_id', function (req, res) {
+  const recipeId = req.params.recipe_id;
+
+  connection.query(`insert into t_favorites (recipe_id) values (${recipeId});`, (err, results) => {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    res.json(results);
+  });    
+})
+
 app.post('/add/ingredients/:recipe_id', function (req, res) {
   const recipe_id = req.params.recipe_id;
   const ingredients = req.body.body;   //why 2 bodys
